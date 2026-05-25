@@ -7,9 +7,11 @@ class UDPSender : MonoBehaviour
     private UdpClient client = null;
     private int port = 4210;
 
-    public void initialize(UdpClient client)
+    public bool Initialize(UdpClient client, int port)
     {
+        this.port = port;
         this.client = client;
+        return true;
     }
 
 
@@ -22,4 +24,5 @@ class UDPSender : MonoBehaviour
     {
         client.Send(Encoding.UTF8.GetBytes(text.ToString()), text.ToString().Length);
     }
+    
 }

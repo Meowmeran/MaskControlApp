@@ -13,14 +13,16 @@ class UDPReceiver : MonoBehaviour
     private int port = 4210;
 
 
-    public void initialize(UdpClient client)
+    public bool Initialize(UdpClient client, int port)
     {
+        this.port = port;
         this.client = client;
         receiveThread = new Thread(new ThreadStart(ReceiveData))
         {
             IsBackground = true
         };
         receiveThread.Start();
+        return true;
     }
 
 
