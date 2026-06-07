@@ -1,63 +1,49 @@
 using UnityEngine;
-using System.Net;
-using System.Threading;
-using System.Text;
-using System.Net.Sockets;
 
-[RequireComponent(typeof(UDPReceiver))]
+/// <summary>
+/// Coordinates the UDP sender and receiver for the cosplay mask.
+///
+/// This is the only script other MonoBehaviours should talk to —
+/// use the public Send* methods to command the mask, and subscribe
+/// to Receiver.OnStateReceived (or read Receiver.LatestState) for feedback.
+///
+/// Requires UDPSender and UDPReceiver on the same GameObject.
+/// </summary>
 [RequireComponent(typeof(UDPSender))]
+[RequireComponent(typeof(UDPReceiver))]
 public class UDPHandler : MonoBehaviour
 {
-    [SerializeField] private string ip = "192.168.4.1";
-    [SerializeField] private int port = 4210;
-    private UdpClient client;
-        
-    private UDPReceiver udpReceiver;
-    private UDPSender udpSender;
+    [SerializeField] private string maskIP   = "192.168.4.1";
+    [SerializeField] private int    maskPort = 4210;
+
+    public UDPSender   Sender   { get; private set; }
+    public UDPReceiver Receiver { get; private set; }
+
     void Start()
-    {
-        client = new UdpClient(ip, port);
-        udpReceiver = GetComponent<UDPReceiver>();
-        udpSender = GetComponent<UDPSender>();
+{
+    Sender   = GetComponent<UDPSender>();
+    Receiver = GetComponent<UDPReceiver>();
 
-        udpReceiver.Initialize(client, port);
-        udpSender.Initialize(client, port);
-    }
-
-    public void Send(string text)
-    {
-        udpSender.SendData(text);
-        Debug.Log("Send: " + text);
-    }
-
-    public void Send(byte type, byte a, byte b, byte c)
-    {
-        int data = (type << 24) | (a << 16) | (b << 8) | c;
-        udpSender.SendData(data);
-        Debug.Log("Send: " + data);
-    }
-
-    public void Send(int data)
-    {
-        udpSender.SendData(data);
-        Debug.Log("Send: " + data);
-    }
-
-    [ContextMenu("Test")]
-    public void Test()
-    {
-        CommandType type = CommandType.SET_EXPRESSION;
-        Send((byte)type, 0, 0, 2);
-    }
-
-
+    Sender.Initialize(maskIP, maskPort);
+    Receiver.Initialize(Sender.Socket);   // share the bound socket
 }
 
+    // -------------------------------------------------------
+    // Convenience pass-throughs so callers don't need a Sender reference.
+    // -------------------------------------------------------
 
-  enum CommandType
-  {
-    SET_MODE = 0x01,
-    SET_EXPRESSION = 0x02,
-    SET_BRIGHTNESS = 0x03,
-    FUNCTION_CALL = 0x04
-  };
+    public void SendSetMode(MaskMode mode)               => Sender.SetMode(mode);
+    public void SendSetExpression(byte index)            => Sender.SetExpression(index);
+    public void SendSetBrightness(byte brightness)       => Sender.SetBrightness(brightness);
+    public void SendQuickSwitch()                        => Sender.QuickSwitch();
+    public void SendScheduleQuickSwitch(byte seconds)    => Sender.ScheduleQuickSwitch(seconds);
+    public void SendSetFrame(Color32[] left, Color32[] right) => Sender.SetFrame(left, right);
+    public void SendSetColor(byte target, byte row, byte col, Color32 color)
+        => Sender.SetColor(target, row, col, color);
+
+    // -------------------------------------------------------
+    // Quick test callable from the Inspector context menu.
+    // -------------------------------------------------------
+    [ContextMenu("Test — Set expression 2")]
+    private void Test() => SendSetExpression(2);
+}
