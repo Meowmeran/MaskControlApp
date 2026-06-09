@@ -16,6 +16,7 @@ public class ExpressionTabManager : MonoBehaviour
 
     void Start()
     {
+        ClearVerticalLayoutOnStart();
         ParseExpressions();
         GenerateButtons();
     }
@@ -44,6 +45,14 @@ public class ExpressionTabManager : MonoBehaviour
         button.GetComponent<ExpressionButton>().SetButton(expression, i);
         expressionButtons.Add(button.GetComponent<ExpressionButton>());
         expressionCount++;
+    }
+
+    private void ClearVerticalLayoutOnStart()
+    {
+        for (int i = 0; i < targetVerticalLayout.transform.childCount; i++)
+        {
+            Destroy(targetVerticalLayout.transform.GetChild(i).gameObject);
+        }
     }
 
     [ContextMenu("ReassignButtonsToHorizontalLayouts")]

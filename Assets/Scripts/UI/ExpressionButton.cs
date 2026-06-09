@@ -2,41 +2,27 @@ using Lean.Gui;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ExpressionButton : MonoBehaviour
+public class ExpressionButton : MonoBehaviour, INetworkButton
 {
     [SerializeField] private Text _buttonText;
     [SerializeField] private Image _buttonImage;
     private UDPHandler _udp;
-    private LeanButton _buttonScript;
+    [SerializeField] private LeanButton _buttonScript;
     private string _expressionName = "";
     private int _index = 0;
     private Color _color = Color.black;
-    void Start()
+    public void Start()
     {
-        if  (_buttonText == null)
+        FindUDP();
+        if (!CheckReferences())
         {
-            Debug.LogError("[ExpressionButton] No Text found.");
-        }
-        if  (_buttonImage == null)
-        {
-            Debug.LogError("[ExpressionButton] No Image found.");
+            Debug.LogError("[ExpressionButton] Missing references.");
         }
         _color = _buttonImage.color;
-        _buttonScript = GetComponent<LeanButton>();
-        if  (_buttonScript == null)
-        {
-            Debug.LogError("[ExpressionButton] No LeanButton found.");
-        }
-        _udp = FindAnyObjectByType<UDPHandler>();
-        if  (_udp == null)
-        {
-            Debug.LogError("[ExpressionButton] No UDPHandler found.");
-        }
-
-        _buttonScript.OnClick.AddListener(OnClick);
+        AttachListener();
     }
 
-    void OnDestroy()
+    public void OnDestroy()
     {
         _buttonScript.OnClick.RemoveListener(OnClick);
     }
@@ -50,12 +36,48 @@ public class ExpressionButton : MonoBehaviour
     public void SetButton(string name, int index)
     {
         _expressionName = name;
-        _index = index; 
+        _index = index;
         _buttonText.text = name;
     }
 
-    public Color GetRandomColor()
+    public Color SetColorFromPattern(int index)
     {
-        return UnityEngine.Random.ColorHSV();
+        index = index % 9;
+        _color = index switch
+        {
+            0 => Color.black,
+            1 => Color.white,
+            2 => Color.red,
+            3 => Color.green,
+            4 => Color.blue,
+            5 => Color.yellow,
+            6 => Color.cyan,
+            7 => Color.magenta,
+            8 => Color.gray,
+            _ => Color.black,
+        };
+        _buttonImage.color = _color;
+        return WashoutColor(_color, 0.5f);
+
+    }
+
+    private Color WashoutColor(Color color, float intensity)
+    {
+        return new Color(color.r * intensity, color.g * intensity, color.b * intensity);
+    }
+
+    public void AttachListener()
+    {
+        _buttonScript.OnClick.AddListener(OnClick);
+    }
+
+    public void FindUDP()
+    {
+        _udp = FindAnyObjectByType<UDPHandler>();
+    }
+
+    public bool CheckReferences()
+    {
+        return _buttonText != null && _buttonImage != null && _buttonScript != null && _udp != null;
     }
 }
