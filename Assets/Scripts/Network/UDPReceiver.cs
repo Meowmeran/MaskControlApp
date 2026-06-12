@@ -127,6 +127,13 @@ public class UDPReceiver : MonoBehaviour
         _udp?.Close();
         _thread?.Join(500);
     }
+
+    public void OnDestroy()
+    {
+        _running = false;
+        _udp?.Close();
+        _thread?.Join(500);
+    }
 }
 
 // -------------------------------------------------------

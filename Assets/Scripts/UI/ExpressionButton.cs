@@ -30,6 +30,11 @@ public class ExpressionButton : MonoBehaviour, INetworkButton
 
     public void OnClick()
     {
+        if (_udp == null)
+        {
+            Debug.LogWarning("[ExpressionButton] UDP not ready.");
+            return;
+        }
         _udp.SendSetExpression((byte)_index);
     }
 

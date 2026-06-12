@@ -9,7 +9,7 @@ public class BrightnessButton : MonoBehaviour, INetworkButton
     [SerializeField] private Image _buttonImage;
     private UDPHandler _udp;
     [SerializeField] private LeanButton _buttonScript;
-    private int _step = 0;
+    [SerializeField] private int _step = 0;
 
 
     public void Start()

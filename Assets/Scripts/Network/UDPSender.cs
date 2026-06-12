@@ -8,13 +8,13 @@ using System.Net.Sockets;
 /// </summary>
 public class UDPSender : MonoBehaviour
 {
-    private UdpClient  _udp;
+    private UdpClient _udp;
     public UdpClient Socket => _udp;
     private IPEndPoint _endpoint;
 
     public void Initialize(string ip, int port)
     {
-        _udp      = new UdpClient(port);
+        _udp = new UdpClient(port);
         _endpoint = new IPEndPoint(IPAddress.Parse(ip), port);
     }
 
@@ -33,6 +33,17 @@ public class UDPSender : MonoBehaviour
 
     public void QuickSwitch()
         => SendPacket(MaskCommandType.FunctionCall, 0x01, 0, 0);
+
+    /// <summary>
+    /// Force the mask to look in a direction for a duration.
+    /// direction: 0=right 1=left 2=down 3=up 4=right-down 5=left-down 6=right-up 7=left-up
+    /// duration: in 100ms steps (e.g. 10 = 1 second). Pass 0xFF direction to release.
+    /// </summary>
+    public void SetLookDirection(byte direction, byte durationSteps)
+        => SendPacket(MaskCommandType.FunctionCall, 0x03, direction, durationSteps);
+
+    public void ReleaseLookDirection()
+        => SendPacket(MaskCommandType.FunctionCall, 0x03, 0xFF, 0);
 
     /// <param name="seconds">How many seconds before the mask auto-switches expression.</param>
     public void ScheduleQuickSwitch(byte seconds)
@@ -59,10 +70,10 @@ public class UDPSender : MonoBehaviour
 
         for (int i = 0; i < 16; i++)
         {
-            payload[4  + i * 3]     = left[i].r;
-            payload[4  + i * 3 + 1] = left[i].g;
-            payload[4  + i * 3 + 2] = left[i].b;
-            payload[52 + i * 3]     = right[i].r;
+            payload[4 + i * 3] = left[i].r;
+            payload[4 + i * 3 + 1] = left[i].g;
+            payload[4 + i * 3 + 2] = left[i].b;
+            payload[52 + i * 3] = right[i].r;
             payload[52 + i * 3 + 1] = right[i].g;
             payload[52 + i * 3 + 2] = right[i].b;
         }
@@ -104,5 +115,25 @@ public class UDPSender : MonoBehaviour
         }
     }
 
-    void OnDestroy() => _udp?.Close();
+    private void CloseSocket()
+    {
+        if (_udp != null)
+        {
+            try
+            {
+                _udp.Close();
+                _udp.Dispose();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("[UDPSender] Error closing socket: " + e.Message);
+            }
+            finally
+            {
+                _udp = null;
+            }
+        }
+    }
+
+    public void OnDestroy() => CloseSocket();
 }
