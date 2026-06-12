@@ -35,7 +35,9 @@ public class ExpressionButton : MonoBehaviour, INetworkButton
             Debug.LogWarning("[ExpressionButton] UDP not ready.");
             return;
         }
+        _udp.SendSetMode(MaskMode.Active);
         _udp.SendSetExpression((byte)_index);
+        
     }
 
     public void SetButton(string name, int index)

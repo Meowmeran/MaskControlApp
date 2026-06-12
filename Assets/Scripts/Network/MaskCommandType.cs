@@ -4,12 +4,12 @@
 /// </summary>
 public enum MaskCommandType : byte
 {
-    SetMode       = 0x01,
+    SetMode = 0x01,
     SetExpression = 0x02,
     SetBrightness = 0x03,
-    FunctionCall  = 0x04,
-    SetFrame      = 0x05,
-    SetColor      = 0x06,
+    FunctionCall = 0x04,
+    SetFrame = 0x05,
+    SetColor = 0x06,
 }
 
 /// <summary>
@@ -18,8 +18,9 @@ public enum MaskCommandType : byte
 /// </summary>
 public enum MaskMode : byte
 {
-    Off       = 0,
-    Active    = 1,
-    Manual    = 2,
-    BlockGame = 3,
+    Off = 3,
+    Active = 0,
+    Manual = 1,
+    BlockGame = 2,
+    ERROR = 4
 }
