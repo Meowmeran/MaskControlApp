@@ -30,6 +30,12 @@ public class PageManager : MonoBehaviour
         ChangeTo(1);
         camSwitch.SwitchTo(1);
     }
+[ContextMenu("ColorPage")]
+    public void ColorPage()
+    {
+        ChangeTo(2);
+        camSwitch.SwitchTo(2);
+    }
 
 
 }
